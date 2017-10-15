@@ -22,7 +22,9 @@ Here's what a puzzle url looks like:
 def url_sort_key(url):
   """Used to order the urls in increasing order by 2nd word if present."""
   match = re.search(r'-(\w+)-(\w+)\.\w+', url)
+  print url
   if match:
+    print match.groups()
     return match.group(2)
   else:
     return url
@@ -106,7 +108,8 @@ def main():
   img_urls = read_urls(args[0])
 
   if todir:
-    download_images(img_urls, todir)
+    ##download_images(img_urls, todir)
+    print ''
   else:
     print '\n'.join(img_urls)
 
