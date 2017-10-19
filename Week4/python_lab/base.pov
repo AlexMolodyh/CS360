@@ -1,17 +1,9 @@
 #include "Colors.inc"
 
 camera{  
-    //Look at eraser        
-    //location <0, 2, 2>
-    //look_at <0, 0, 2.7>
-         
     //Look at whole page
     location <0, 6, -2>
     look_at <0, 0, -.5>
-    
-    //Look at tip of pencil 
-    //location <2, 2, -.5>
-    //look_at <1.4, .16, -.4>
 }
 
 light_source { <10, 10, -5> White }    
