@@ -2,7 +2,7 @@
 
 camera{  
     //Look at whole page
-    location <%s, %s, %s>
+    location <0, 6, -2>
     look_at <0, 0, 0>
 }
 
