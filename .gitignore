@@ -1,3 +1,4 @@
+# file named: .gitignore
 
-* Week4/python_lab/data/
-* Week4/python_lab/img/
+Week4/python_lab/data/
+Week4/python_lab/img/
