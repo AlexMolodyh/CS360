@@ -13,11 +13,11 @@ def mod_file(file_to_mod, file_content):
 # and image output name.
 def create_pov_file_list(file_content):
     t = 0.0
-    y = 2.8
+    y = 2.6
     file_num = 0#the image and pov file name indexes
     radius_list = []
     while t < (2 * math.pi):
-        z = 8 * math.cos(t)
+        z = -8 * math.cos(t)
         x = 8 * math.sin(t)
         y += .01
         t += .01;
