@@ -1,5 +1,6 @@
 import os
 import math
+import basic_shape
 
 # inserts content into the designated file. 
 # Ex: if we have an element "look_at<%s, 0, %s>" and we insert
