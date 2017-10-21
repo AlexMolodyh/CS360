@@ -1,6 +1,15 @@
 import os
 import modifiers
 
+## Author: Alexander Molodyh
+## Date: 10/21/2017
+## Class: CS360
+## Assignment: Python_Lab Part 1 and 2
+
+## A cylinder object for pov-ray.
+## To create a cylinder file you must pass in two vectors
+## one for each side of the cylinder, a radius, an open modifier if you want it
+## to be an open cylinder, and a list of item modifiers such as pigment, and finish.
 class Cylinder:
 
     def __init__(self, v1, v2, r, opn, f_items):
@@ -12,6 +21,7 @@ class Cylinder:
         self.features_list = []
         self.features_list.extend(f_items)
 
+    # returns a cylinder string ready to be inserted into the pov file.
     def build(self):
         cylinder_str = 'cylinder {'
         for v in self.cyl_param_list:
