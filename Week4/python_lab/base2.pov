@@ -41,6 +41,4 @@ union {
             pigment { Black }
         }
     } 
-    
-    
 }

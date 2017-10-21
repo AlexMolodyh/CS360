@@ -2,7 +2,7 @@
 
 camera{  
     //Look at whole page
-    location <%s, %s, %s>
+    location <0, 6, -2>
     look_at <0, 0, 0>
 }
 
@@ -41,5 +41,6 @@ union {
             pigment { Black }
         }
     } 
-    cylinder {<0, 0.5, 0>, <0, 1, 0>, .15 pigment {Red} finish { ambient 2 } }//to change
+    
+    
 }

@@ -1,5 +1,7 @@
 import os
 import math
+import re
+import lib
 
 # inserts content into the designated file. 
 # Ex: if we have an element "look_at<%s, 0, %s>" and we insert
@@ -19,9 +21,13 @@ def create_pov_file_list(file_content):
     while t < (2 * math.pi):
         z = -8 * math.cos(t)
         x = 8 * math.sin(t)
+        x2 = (-2 * math.cos(t)) * -1
+        z2 = (2 * math.sin(t)) * -1
+        print 'z2 is: ' + str(z2)
+        print 'x2 is: ' + str(x2)
         y += .01
-        t += .01;
-        modded_file = mod_file(file_content, (x, y, z))#file with new coordinates
+        t += .1;
+        modded_file = mod_file(file_content, (x, y, z, x2, z2))#file with new coordinates
         out_pov_name = 'data\\%s.pov' % str(file_num)#pov output name
         out_image_name = 'img\\%s.png' % str(file_num)#image output name
         file_num += 1
@@ -85,14 +91,29 @@ def create_image_names_file(image_names_list):
 
 
 def main():
+    cylinder_reg = r'cylinder {<(\S+, \S+, \S+)>, <(\S+, \S+, \S+)>, (\S+) pigment {(\S+)} finish { (\S+)( )+(\d) } }//to change'
+
     pov_file = open_file('base.pov')
-    pov_file_list = create_pov_file_list(pov_file)
-    create_pov_files(pov_file_list)
-    create_images(pov_file_list)
-    img_names = create_image_names_file(pov_file_list)
-    compile_movie(img_names)
+    
+    # pov_file_list = create_pov_file_list(pov_file)
+    # create_pov_files(pov_file_list)
+    # create_images(pov_file_list)
+    # img_names = create_image_names_file(pov_file_list)
+    # compile_movie(img_names)
 
+    #print pov_file[-1:]
 
+    m = re.search(cylinder_reg, pov_file)
+    vector1 = lib.Vector(-3, 3, 3)
+    vector2 = lib.Vector(0, 0, 0)
+    pigment = lib.Pigment('Red')
+    finish = lib.Finish('ambient', 2)
+    items_list = [pigment, finish]
+    cylinder = lib.Cylinder(vector1, vector2, .15, '', items_list)
+    if m:
+        replaced = re.sub(cylinder_reg, cylinder.build(), pov_file)
+        print replaced
+        print pov_file
 
 if __name__ == '__main__':
   main()

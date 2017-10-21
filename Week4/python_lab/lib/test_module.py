@@ -2,7 +2,8 @@ import basic_shape
 import modifiers
 
 def main():
-    vector1 = modifiers.Vector(2, 3, 4)
+    cylinder_match = r'cylinder {<(\S+, \S+, \S+)>, <(\S+, \S+, \S+)>, (\S+) pigment {(\S+)} finish { (\S+)( )+(\d) } }//to change'
+    vector1 = modifiers.Vector(2, 3, -4)
     vector2 = modifiers.Vector(0, 0, 0)
     pigment = modifiers.Pigment('Green')
     finish = modifiers.Finish('brilliance', 3)
