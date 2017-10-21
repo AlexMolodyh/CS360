@@ -2,16 +2,14 @@ import os
 import modifiers
 
 class Cylinder:
-    cyl_param_list = []
-    radius = 0.0
-    open = ''
-    features_list = []
 
     def __init__(self, v1, v2, r, opn, f_items):
+        self.cyl_param_list = []
         self.cyl_param_list.append(v1.build())
         self.cyl_param_list.append(v2.build())
         self.radius = r
-        self.open = opn
+        self.open = opn if opn else ''
+        self.features_list = []
         self.features_list.extend(f_items)
 
     def build(self):

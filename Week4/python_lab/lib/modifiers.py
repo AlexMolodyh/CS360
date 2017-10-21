@@ -3,10 +3,10 @@ import os
 
 class Vector:
 
-    def __init__(self, x, y, z):
-        self.x = x
-        self.y = y
-        self.z = z
+    def __init__(self, **kws):
+        self.x = kws['x']
+        self.y = kws['y']
+        self.z = kws['z']
         
 
     def build(self):

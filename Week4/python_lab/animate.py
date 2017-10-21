@@ -23,11 +23,12 @@ def create_pov_file_list(file_content):
         x = 8 * math.sin(t)
         x2 = (-2 * math.cos(t)) * -1
         z2 = (2 * math.sin(t)) * -1
-        print 'z2 is: ' + str(z2)
-        print 'x2 is: ' + str(x2)
         y += .01
-        t += .1;
-        modded_file = mod_file(file_content, (x, y, z, x2, z2))#file with new coordinates
+        t += .15;
+        v1 = lib.Vector(x=x2, y=.5, z=z2)
+        v2 = lib.Vector(x=0, y=2, z=0)
+        modded_file = get_replaced_cylinder(create_cylinder(v1, v2), file_content)
+        modded_file = mod_file(modded_file, (x, y, z))#file with new coordinates
         out_pov_name = 'data\\%s.pov' % str(file_num)#pov output name
         out_image_name = 'img\\%s.png' % str(file_num)#image output name
         file_num += 1
@@ -35,6 +36,23 @@ def create_pov_file_list(file_content):
         radius_list.append(pov_tuple)
     
     return radius_list
+
+
+def get_replaced_cylinder(cylinder, pov_file):
+    cylinder_reg = r'cylinder {<(\S+, \S+, \S+)>, <(\S+, \S+, \S+)>, (\S+) pigment {(\S+)} finish { (\S+)( )+(\d) } }//to change'
+    replaced = re.sub(cylinder_reg, cylinder.build(), pov_file)
+    return replaced 
+
+
+## Creates a cylinder object for pov-ray.
+## param v1, v2 must be Vectors from the lib.modifiers module.
+def create_cylinder(v1, v2):
+    pigment = lib.Pigment('Red')
+    finish = lib.Finish('ambient', 2)
+    items_list = [pigment, finish]
+    cylinder = lib.Cylinder(v1, v2, .15, '', items_list)
+    return cylinder
+
 
 # generates all of the pov files for every x, y, z iteration
 def create_pov_files(pov_file_list):
@@ -47,12 +65,6 @@ def create_pov_file(file_content, out_file_name):
     file_output.write(file_content)
     file_output.close()
     return file_output
-
-
-def get_camera():
-    camera_match = r"camera\{(\s*?.*?)*?\}"
-    location = r"location\s+<\d+.+>"
-    look_at = r"look_at\s+<\d+.+>"
 
 
 # generates all of the images based off all the pov files
@@ -77,7 +89,6 @@ def open_file(filename):
 def compile_movie(images):
     images_path = 'mencoder mf://@img/image_names -mf w=800:h=600:fps=35:type=png -ovc lavc \
     -lavcopts vcodec=mpeg4:mbd=2:trell -oac copy -o output.avi '
-    # images_path = 'mencoder mf://%s -mf w=800:h=600:fps=25:type=png -ovc copy -oac copy -o output.avi' % images
     os.system(images_path)
 
 
@@ -91,29 +102,13 @@ def create_image_names_file(image_names_list):
 
 
 def main():
-    cylinder_reg = r'cylinder {<(\S+, \S+, \S+)>, <(\S+, \S+, \S+)>, (\S+) pigment {(\S+)} finish { (\S+)( )+(\d) } }//to change'
-
     pov_file = open_file('base.pov')
-    
-    # pov_file_list = create_pov_file_list(pov_file)
-    # create_pov_files(pov_file_list)
-    # create_images(pov_file_list)
-    # img_names = create_image_names_file(pov_file_list)
-    # compile_movie(img_names)
+    pov_file_list = create_pov_file_list(pov_file)
+    create_pov_files(pov_file_list)
+    create_images(pov_file_list)
+    img_names = create_image_names_file(pov_file_list)
+    compile_movie(img_names)
 
-    #print pov_file[-1:]
-
-    m = re.search(cylinder_reg, pov_file)
-    vector1 = lib.Vector(-3, 3, 3)
-    vector2 = lib.Vector(0, 0, 0)
-    pigment = lib.Pigment('Red')
-    finish = lib.Finish('ambient', 2)
-    items_list = [pigment, finish]
-    cylinder = lib.Cylinder(vector1, vector2, .15, '', items_list)
-    if m:
-        replaced = re.sub(cylinder_reg, cylinder.build(), pov_file)
-        print replaced
-        print pov_file
 
 if __name__ == '__main__':
   main()
