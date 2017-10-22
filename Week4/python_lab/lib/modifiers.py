@@ -33,6 +33,7 @@ class Pigment:
 
 
 ## Finish for a basic_object in pov-ray.
+## Uses a dictionary to store items
 class Finish:
 
     def __init__(self, item, value):
