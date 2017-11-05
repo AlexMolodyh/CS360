@@ -7,7 +7,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
+#include <inttypes.h>
 
 #define MAX_FILE_SIZE (10485760)/*10 MB's*/
 #define MB_BYTES (1048576)/*1 MB*/
@@ -18,7 +18,7 @@
 #define BIT_RATE_SHIFT (4)/*right-shift amount for bitrate bit*/
 #define FREQUENCY_SHIFT (2)/*right-shift amount for frequence bit*/
 
-//used to access MP3 header sections(Bytes)
+/*used to access MP3 header sections(Bytes)*/
 #define HEADER_SECTION_0 (0)
 #define HEADER_SECTION_1 (1)
 #define HEADER_SECTION_2 (2)
@@ -33,7 +33,7 @@
 #define ORIGINAL_COPY_SHIFT (2)
 
 /*struct contains most of the data needed to work with*/
-struct myfile{
+struct myfile {
 	FILE *fp;
 	double size;
 	char *filename;
@@ -46,19 +46,18 @@ struct myfile{
 	int multiplier;
 };
 
-myfile initialize(myfile);
-myfile readFile(myfile);
-myfile getSequenceIndex(myfile);
-myfile getParams(myfile, unsigned char);
-myfile setMfMath(myfile, int, int, int);
+struct myfile initialize(struct myfile);
+struct myfile readFile(struct myfile);
+struct myfile getSequenceIndex(struct myfile);
+struct myfile getParams(struct myfile, unsigned char);
+struct myfile setMfMath(struct myfile, int, int, int);
 
-int isBitOn(myfile, int, int);
-int getBitrate(myfile, int);
-int getFrequency(myfile, int);
+int isBitOn(struct myfile, int, int);
+int getBitrate(struct myfile, int);
+int getFrequency(struct myfile, int);
 
 /*deletes the data in myfile struct*/
-void deletemf(myfile);
-
+void deletemf(struct myfile);
 
 int main( int argc, char ** argv )
 {
@@ -114,10 +113,11 @@ int main( int argc, char ** argv )
 	}
 
 	deletemf(mf);
+	return EXIT_SUCCESS;
 }
 
 /*retrieves the sampling rate frequency*/
-int getFrequency(myfile mf, int shift)
+int getFrequency(struct myfile mf, int shift)
 {
 	unsigned char c = mf.data[mf.currentIndex + HEADER_SECTION_1];
 	c = 3 & (c >> shift);/*shift bit to the right 3 times then AND by 00000011 to get frequency output*/
@@ -134,7 +134,7 @@ int getFrequency(myfile mf, int shift)
 }
 
 /*retrieve the bitrate*/
-int getBitrate(myfile mf, int shift)
+int getBitrate(struct myfile mf, int shift)
 {
 	if(mf.currentIndex == -1)
 		return 0;
@@ -149,7 +149,7 @@ int getBitrate(myfile mf, int shift)
 }
 
 /*sets parameters to calculate bitrate*/
-myfile getParams(myfile mf, unsigned char c)
+struct myfile getParams(struct myfile mf, unsigned char c)
 {
 	if( c <= 5)
 		mf = setMfMath(mf, 32, 8, ((int) c) - 1);
@@ -163,7 +163,7 @@ myfile getParams(myfile mf, unsigned char c)
 }
 
 /*sets the myfile parameters to calculate the bitrate*/
-myfile setMfMath(myfile mf, int b, int i, int m)
+struct myfile setMfMath(struct myfile mf, int b, int i, int m)
 {
 	mf.base = b;
 	mf.incrementor = i;
@@ -172,7 +172,7 @@ myfile setMfMath(myfile mf, int b, int i, int m)
 }
 
 /*checks to see whether a bit is on or off*/
-int isBitOn(myfile mf, int shift, int headerSection)
+int isBitOn(struct myfile mf, int shift, int headerSection)
 {
 	if(mf.currentIndex == -1)
 		return 0;
@@ -182,7 +182,7 @@ int isBitOn(myfile mf, int shift, int headerSection)
 }
 
 /*finds the index where the mpeg header sequence starts. if it isn't found, then a -1 is returned*/
-myfile getSequenceIndex(myfile mf)
+struct myfile getSequenceIndex(struct myfile mf)
 {
 	int i; 
 	for(i = 0; i < mf.size - 1; i++)
@@ -198,7 +198,7 @@ myfile getSequenceIndex(myfile mf)
 }
 
 /*initializes the file*/
-myfile initialize(myfile mf)
+struct myfile initialize(struct myfile mf)
 {
 	
 	mf.fp = fopen(mf.filename, "rb");
@@ -212,7 +212,7 @@ myfile initialize(myfile mf)
 }
 
 /*reads in the file by bytes*/
-myfile readFile(myfile mf)
+struct myfile readFile(struct myfile mf)
 {
 	/* How many bytes are there in the file?  If you know the OS you're
 	 * on you can use a system API call to find out.  Here we use ANSI standard
@@ -235,9 +235,9 @@ myfile readFile(myfile mf)
 }
 
 /*deletes all pointers in myfile struct*/
-void deletemf(myfile mf)
+void deletemf(struct myfile mf)
 {
-	delete(mf.filename);
-	delete(mf.fp);
-	delete(mf.data);
+	free(mf.filename);
+	free(mf.fp);
+	free(mf.data);
 }

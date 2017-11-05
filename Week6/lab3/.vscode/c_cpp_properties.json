@@ -47,7 +47,8 @@
             "includePath": [
                 "${workspaceRoot}",
                 "g:/MinGW/lib/gcc/mingw32/6.3.0/include/c++/tr1",
-                "g:/MinGW/lib/gcc/mingw32/6.3.0/include/c++"
+                "g:/MinGW/lib/gcc/mingw32/6.3.0/include/c++",
+                "g:/MinGW/lib/gcc/mingw32/6.3.0/include/c++/mingw32"
             ],
             "defines": [
                 "_DEBUG",
