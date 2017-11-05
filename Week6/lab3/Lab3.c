@@ -59,7 +59,7 @@ struct myfile setMfMath(struct myfile, int, int, int);
 
 int isBitOn(struct myfile, int, int);
 int getBitrate(struct myfile, int);
-int getFrequency(struct myfile, int);
+double getFrequency(struct myfile, int);
 
 /*deletes the data in myfile struct*/
 void deletemf(struct myfile);
@@ -98,8 +98,7 @@ int main( int argc, char ** argv )
 	{
 		printf("File size: %.2f MB\n", ((mf.size/MB_BYTES) * 100) * 0.01f );
 		printf("Is an mpeg layer 3: Yes\n");
-		printf("Bitrate: %d\n", getBitrate(mf, BIT_RATE_SHIFT));
-		printf("Frequency: %d Hz\n", getFrequency(mf, FREQUENCY_SHIFT));
+		printf("Bitrate: %dkbps at %.1fkHz\n", getBitrate(mf, BIT_RATE_SHIFT), (getFrequency(mf, FREQUENCY_SHIFT) / 1000) );
 		printf("Is copyright? %s\n", ((isBitOn(mf, COPYRIGHT_SHIFT, HEADER_SECTION_2)) ? "Yes" : "No"));
 		printf("Is original? %s\n", ((isBitOn(mf, ORIGINAL_COPY_SHIFT, HEADER_SECTION_2) == 0 ) ? "Yes" : "No"));
 
@@ -122,11 +121,11 @@ int main( int argc, char ** argv )
 }
 
 /*retrieves the sampling rate frequency*/
-int getFrequency(struct myfile mf, int shift)
+double getFrequency(struct myfile mf, int shift)
 {
 	unsigned char c = mf.data[mf.currentIndex + HEADER_SECTION_1];
 	c = 3 & (c >> shift);/*shift bit to the right 3 times then AND by 00000011 to get frequency output*/
-	int frequency = 0;
+	double frequency = 0.0;
 
 	if(c == FREQUENCY_32)
 		frequency = 32000;
