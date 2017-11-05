@@ -1,19 +1,13 @@
-/* CS315 Lab 3: C data types */
+/* CS315 Lab 3: C data types 
+ * Author: Alexander Molodyh
+ * Date: 11/5/2017
+ * Class: CS360
+ * Assignment: Lab3
+ */
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <inttypes.h>
-
-#define BYTE_TO_BINARY_PATTERN "%c%c%c%c%c%c%c%c"
-#define BYTE_TO_BINARY(byte)  \
-  (byte & 0x80 ? '1' : '0'), \
-  (byte & 0x40 ? '1' : '0'), \
-  (byte & 0x20 ? '1' : '0'), \
-  (byte & 0x10 ? '1' : '0'), \
-  (byte & 0x08 ? '1' : '0'), \
-  (byte & 0x04 ? '1' : '0'), \
-  (byte & 0x02 ? '1' : '0'), \
-  (byte & 0x01 ? '1' : '0') 
+#include <unistd.h>
 
 #define MAX_FILE_SIZE (10485760)/*10 MB's*/
 #define MB_BYTES (1048576)/*1 MB*/
@@ -100,14 +94,14 @@ int main( int argc, char ** argv )
 	{
 		printf("File size: %.2f MB\n", ((mf.size/MB_BYTES) * 100) * 0.01f );
 		printf("Is an mpeg layer 3: Yes\n");
-		printf("The bitrate is: %d\n", getBitrate(mf, BIT_RATE_SHIFT));
-		printf("The frequency is %d Hz\n", getFrequency(mf, FREQUENCY_SHIFT));
+		printf("Bitrate: %d\n", getBitrate(mf, BIT_RATE_SHIFT));
+		printf("Frequency: %d Hz\n", getFrequency(mf, FREQUENCY_SHIFT));
 		printf("Is copyright? %s\n", ((isBitOn(mf, COPYRIGHT_SHIFT, HEADER_SECTION_2)) ? "Yes" : "No"));
 		printf("Is original? %s\n", ((isBitOn(mf, ORIGINAL_COPY_SHIFT, HEADER_SECTION_2) == 0 ) ? "Yes" : "No"));
 
-		if((isBitOn(mf, COPYRIGHT_SHIFT, HEADER_SECTION_2))
+		if(isBitOn(mf, COPYRIGHT_SHIFT, HEADER_SECTION_2))
 		{
-			if((isBitOn(mf, ORIGINAL_COPY_SHIFT, HEADER_SECTION_2))
+			if(isBitOn(mf, ORIGINAL_COPY_SHIFT, HEADER_SECTION_2))
 			{
 				printf("\nALERT!!! %s is not an ORIGINAL copy!!\n", mf.filename);
 			}
@@ -119,14 +113,6 @@ int main( int argc, char ** argv )
 		exit(EXIT_SUCCESS);
 	}
 
-	// printf("Index is %d\n", mf.currentIndex);
-
-	// int i;
-	// for(i = 0; i < 4000; i++)
-	// {
-	// 	printf("%d = " BYTE_TO_BINARY_PATTERN " \n", i, BYTE_TO_BINARY(mf.data[i]));
-	// }
-		
 	deletemf(mf);
 }
 
