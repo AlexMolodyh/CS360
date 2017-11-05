@@ -244,7 +244,6 @@ struct myfile readFile(struct myfile mf)
 /*deletes all pointers in myfile struct*/
 void deletemf(struct myfile mf)
 {
-	free(mf.filename);
 	free(mf.fp);
 	free(mf.data);
 }
