@@ -32,6 +32,10 @@
 #define COPYRIGHT_SHIFT (3)
 #define ORIGINAL_COPY_SHIFT (2)
 
+/*!!!!!!!!!!!GLOBAL VIRIABLE!!!!!!!!!!*/
+/*I don't like using global variable but here's one for lab purposes*/
+double globalSize = 0;
+
 /*struct contains most of the data needed to work with*/
 struct myfile {
 	FILE *fp;
@@ -46,6 +50,7 @@ struct myfile {
 	int multiplier;
 };
 
+/*functions used to retrieve data from mp3 file*/
 struct myfile initialize(struct myfile);
 struct myfile readFile(struct myfile);
 struct myfile getSequenceIndex(struct myfile);
@@ -222,6 +227,9 @@ struct myfile readFile(struct myfile mf)
 	fseek( mf.fp, 0, SEEK_END );		/* go to 0 bytes from the end*/
 	mf.size = ftell(mf.fp);				/* how far from the beginning?*/
 	rewind(mf.fp);						/* go back to the beginning*/
+
+	/*Global file size varible(not going to use it but I'm assigning it here)*/
+	globalSize = mf.size;
 	
 	if( mf.size < 1 || mf.size > MAX_FILE_SIZE )
 	{
