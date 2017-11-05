@@ -15,14 +15,14 @@
   (byte & 0x02 ? '1' : '0'), \
   (byte & 0x01 ? '1' : '0') 
 
-#define MAX_FILE_SIZE (10485760)//10 MB's
-#define MB_BYTES (1048576)//1 MB
-#define SEQUENCE (255)
-#define SEQUENCE_HALF (240)
-#define MPEG_SHIFT (3)
-#define LAYER_3_SHIFT (1)
-#define BIT_RATE_SHIFT (4)
-#define FREQUENCY_SHIFT (2)
+#define MAX_FILE_SIZE (10485760)/*10 MB's*/
+#define MB_BYTES (1048576)/*1 MB*/
+#define SEQUENCE (255)/*start of mp3 header sequence*/
+#define SEQUENCE_HALF (240)/*next 4 bits for start of mp3 header sequence*/
+#define MPEG_SHIFT (3)/*right-shift amount for mpeg bit*/
+#define LAYER_3_SHIFT (1)/*right-shift amount for layer 3 bit*/
+#define BIT_RATE_SHIFT (4)/*right-shift amount for bitrate bit*/
+#define FREQUENCY_SHIFT (2)/*right-shift amount for frequence bit*/
 
 //used to access MP3 header sections(Bytes)
 #define HEADER_SECTION_0 (0)
@@ -38,7 +38,7 @@
 #define COPYRIGHT_SHIFT (3)
 #define ORIGINAL_COPY_SHIFT (2)
 
-
+/*struct contains most of the data needed to work with*/
 struct myfile{
 	FILE *fp;
 	double size;
@@ -62,12 +62,13 @@ int isBitOn(myfile, int, int);
 int getBitrate(myfile, int);
 int getFrequency(myfile, int);
 
+/*deletes the data in myfile struct*/
 void deletemf(myfile);
 
 
 int main( int argc, char ** argv )
 {
-	// Open the file given on the command line
+	/*Open the file given on the command line*/
 	if( argc != 2 )
 	{
 		printf( "Usage: %s filename.mp3\n", argv[0] );
@@ -76,11 +77,8 @@ int main( int argc, char ** argv )
 
 	struct myfile mf; 
 	mf.filename = argv[1];
-
-	mf = initialize(mf);
-	mf = readFile(mf);
-	
-	printf( "File size: %.2f MB\n", ((mf.size/MB_BYTES) * 100) * 0.01f );
+	mf = initialize(mf);/*initialize file*/
+	mf = readFile(mf);/*read in file*/
 	
 	/*Allocate memory on the heap for a copy of the file*/
 	mf.data = (unsigned char *)malloc(mf.size);
@@ -94,20 +92,28 @@ int main( int argc, char ** argv )
 		deletemf(mf);
 		exit(EXIT_SUCCESS);
 	}
-	
-	// We now have a pointer to the first byte of data in a copy of the file, have fun
-	// unsigned char * data    <--- this is the pointer
 
-	mf = getSequenceIndex(mf);//Index for start of SEQUENCE bits
+	mf = getSequenceIndex(mf);/*Index for start of SEQUENCE bits*/
+
+	/*Check to see if the file format is in mpeg layer 3*/
 	if(isBitOn(mf, MPEG_SHIFT, HEADER_SECTION_0) && isBitOn(mf, LAYER_3_SHIFT, HEADER_SECTION_0))
 	{
-		printf("Is an mpeg layer 3\n");
+		printf("File size: %.2f MB\n", ((mf.size/MB_BYTES) * 100) * 0.01f );
+		printf("Is an mpeg layer 3: Yes\n");
 		printf("The bitrate is: %d\n", getBitrate(mf, BIT_RATE_SHIFT));
 		printf("The frequency is %d Hz\n", getFrequency(mf, FREQUENCY_SHIFT));
-		printf("Is copyright? %s\n", ((isBitOn(mf, COPYRIGHT_SHIFT, HEADER_SECTION_2)) ? "True" : "False"));
-		printf("Is original? %s\n", ((isBitOn(mf, ORIGINAL_COPY_SHIFT, HEADER_SECTION_2) == 0 ) ? "True" : "False"));
+		printf("Is copyright? %s\n", ((isBitOn(mf, COPYRIGHT_SHIFT, HEADER_SECTION_2)) ? "Yes" : "No"));
+		printf("Is original? %s\n", ((isBitOn(mf, ORIGINAL_COPY_SHIFT, HEADER_SECTION_2) == 0 ) ? "Yes" : "No"));
+
+		if((isBitOn(mf, COPYRIGHT_SHIFT, HEADER_SECTION_2))
+		{
+			if((isBitOn(mf, ORIGINAL_COPY_SHIFT, HEADER_SECTION_2))
+			{
+				printf("\nALERT!!! %s is not an ORIGINAL copy!!\n", mf.filename);
+			}
+		}
 	}
-	else
+	else/*file is not mpeg layer 3. delete struct and exit program*/
 	{
 		deletemf(mf);
 		exit(EXIT_SUCCESS);
@@ -128,7 +134,7 @@ int main( int argc, char ** argv )
 int getFrequency(myfile mf, int shift)
 {
 	unsigned char c = mf.data[mf.currentIndex + HEADER_SECTION_1];
-	c = 3 & (c >> shift);
+	c = 3 & (c >> shift);/*shift bit to the right 3 times then AND by 00000011 to get frequency output*/
 	int frequency = 0;
 
 	if(c == FREQUENCY_32)
@@ -150,6 +156,8 @@ int getBitrate(myfile mf, int shift)
 	unsigned char c = mf.data[mf.currentIndex + HEADER_SECTION_1];
 	c = c >> shift;
 	mf = getParams(mf, c);
+
+	/*formula to calculate bitrate*/
 	int bitrate = mf.base + (mf.incrementor * mf.multiplier);
 	return bitrate;
 }
@@ -168,6 +176,7 @@ myfile getParams(myfile mf, unsigned char c)
 	return mf;
 }
 
+/*sets the myfile parameters to calculate the bitrate*/
 myfile setMfMath(myfile mf, int b, int i, int m)
 {
 	mf.base = b;
@@ -176,6 +185,7 @@ myfile setMfMath(myfile mf, int b, int i, int m)
 	return mf;
 }
 
+/*checks to see whether a bit is on or off*/
 int isBitOn(myfile mf, int shift, int headerSection)
 {
 	if(mf.currentIndex == -1)
@@ -185,6 +195,7 @@ int isBitOn(myfile mf, int shift, int headerSection)
 	return 1 & ( c >> shift );
 }
 
+/*finds the index where the mpeg header sequence starts. if it isn't found, then a -1 is returned*/
 myfile getSequenceIndex(myfile mf)
 {
 	int i; 
@@ -200,6 +211,7 @@ myfile getSequenceIndex(myfile mf)
 	return mf;
 }
 
+/*initializes the file*/
 myfile initialize(myfile mf)
 {
 	
@@ -213,26 +225,30 @@ myfile initialize(myfile mf)
 	return mf;
 }
 
+/*reads in the file by bytes*/
 myfile readFile(myfile mf)
 {
-	// How many bytes are there in the file?  If you know the OS you're
-	// on you can use a system API call to find out.  Here we use ANSI standard
-	// function calls.
+	/* How many bytes are there in the file?  If you know the OS you're
+	 * on you can use a system API call to find out.  Here we use ANSI standard
+	 * function calls.
+	 */
 	mf.size = 0;
-	fseek( mf.fp, 0, SEEK_END );		// go to 0 bytes from the end
-	mf.size = ftell(mf.fp);				// how far from the beginning?
-	rewind(mf.fp);						// go back to the beginning
+	fseek( mf.fp, 0, SEEK_END );		/* go to 0 bytes from the end*/
+	mf.size = ftell(mf.fp);				/* how far from the beginning?*/
+	rewind(mf.fp);						/* go back to the beginning*/
 	
 	if( mf.size < 1 || mf.size > MAX_FILE_SIZE )
 	{
 		printf("File size is not within the allowed range\n"); 
 		fclose(mf.fp);
+		deletemf(mf);
 		exit(EXIT_SUCCESS);
 	}
 	
 	return mf;
 }
 
+/*deletes all pointers in myfile struct*/
 void deletemf(myfile mf)
 {
 	delete(mf.filename);
