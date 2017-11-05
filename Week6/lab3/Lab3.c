@@ -17,24 +17,51 @@
 
 #define MAX_FILE_SIZE (10485760)//10 MB's
 #define MB_BYTES (1048576)//1 MB
-#define sequence (255)
-#define sequence_half (240)
+#define SEQUENCE (255)
+#define SEQUENCE_HALF (240)
+#define MPEG_SHIFT (3)
+#define LAYER_3_SHIFT (1)
+#define BIT_RATE_SHIFT (4)
+#define FREQUENCY_SHIFT (2)
 
+//used to access MP3 header sections(Bytes)
+#define HEADER_SECTION_0 (0)
+#define HEADER_SECTION_1 (1)
+#define HEADER_SECTION_2 (2)
+
+/*frequency identifiers*/
+#define FREQUENCY_32 (2)
+#define FREQUENCY_44 (0)
+#define FREQUENCY_48 (1)
+
+/*copyrighted shifts*/
+#define COPYRIGHT_SHIFT (3)
+#define ORIGINAL_COPY_SHIFT (2)
 
 
 struct myfile{
 	FILE *fp;
-	int size;
+	double size;
 	char *filename;
 	unsigned char *data;
 	int bytesRead;
 	int currentIndex;
+
+	int base;
+	int incrementor;
+	int multiplier;
 };
 
 myfile initialize(myfile);
 myfile readFile(myfile);
 myfile getSequenceIndex(myfile);
-int isBitOn(myfile, int);
+myfile getParams(myfile, unsigned char);
+myfile setMfMath(myfile, int, int, int);
+
+int isBitOn(myfile, int, int);
+int getBitrate(myfile, int);
+int getFrequency(myfile, int);
+
 void deletemf(myfile);
 
 
@@ -54,9 +81,11 @@ int main( int argc, char ** argv )
 	mf = readFile(mf);
 	
 	printf( "File size: %.2f MB\n", ((mf.size/MB_BYTES) * 100) * 0.01f );
-	// Allocate memory on the heap for a copy of the file
+	
+	/*Allocate memory on the heap for a copy of the file*/
 	mf.data = (unsigned char *)malloc(mf.size);
-	// Read it into our block of memory
+
+	/*Read it into our block of memory*/
 	mf.bytesRead = fread( mf.data, sizeof(unsigned char), mf.size, mf.fp );
 	if( mf.bytesRead != mf.size )
 	{
@@ -69,28 +98,91 @@ int main( int argc, char ** argv )
 	// We now have a pointer to the first byte of data in a copy of the file, have fun
 	// unsigned char * data    <--- this is the pointer
 
-	printf("The size of data is %d\n", sizeof(mf.data));
-	printf("The size of size is %d\n", mf.size);
-
-	mf = getSequenceIndex(mf);//Index for start of sequence bits
-	int isMpeg = isBitOn(mf, 2);
-
-	printf("Is MPEG? %d\n", isMpeg);
-	printf("Index is %d\n", mf.currentIndex);
-
-	int i;
-	for(i = 0; i < 4000; i++)
+	mf = getSequenceIndex(mf);//Index for start of SEQUENCE bits
+	if(isBitOn(mf, MPEG_SHIFT, HEADER_SECTION_0) && isBitOn(mf, LAYER_3_SHIFT, HEADER_SECTION_0))
 	{
-		printf("%d = " BYTE_TO_BINARY_PATTERN " \n", i, BYTE_TO_BINARY(mf.data[i]));
+		printf("Is an mpeg layer 3\n");
+		printf("The bitrate is: %d\n", getBitrate(mf, BIT_RATE_SHIFT));
+		printf("The frequency is %d Hz\n", getFrequency(mf, FREQUENCY_SHIFT));
+		printf("Is copyright? %s\n", ((isBitOn(mf, COPYRIGHT_SHIFT, HEADER_SECTION_2)) ? "True" : "False"));
+		printf("Is original? %s\n", ((isBitOn(mf, ORIGINAL_COPY_SHIFT, HEADER_SECTION_2) == 0 ) ? "True" : "False"));
 	}
+	else
+	{
+		deletemf(mf);
+		exit(EXIT_SUCCESS);
+	}
+
+	// printf("Index is %d\n", mf.currentIndex);
+
+	// int i;
+	// for(i = 0; i < 4000; i++)
+	// {
+	// 	printf("%d = " BYTE_TO_BINARY_PATTERN " \n", i, BYTE_TO_BINARY(mf.data[i]));
+	// }
 		
 	deletemf(mf);
 }
 
-int isBitOn(myfile mf, int shift)
+/*retrieves the sampling rate frequency*/
+int getFrequency(myfile mf, int shift)
 {
-	char c = mf.data[mf.currentIndex];
-	return 1 & c>>shift;
+	unsigned char c = mf.data[mf.currentIndex + HEADER_SECTION_1];
+	c = 3 & (c >> shift);
+	int frequency = 0;
+
+	if(c == FREQUENCY_32)
+		frequency = 32000;
+	else if(c == FREQUENCY_44)
+		frequency = 44100;
+	else if(c == FREQUENCY_48)
+		frequency = 48000;
+	
+	return frequency;
+}
+
+/*retrieve the bitrate*/
+int getBitrate(myfile mf, int shift)
+{
+	if(mf.currentIndex == -1)
+		return 0;
+
+	unsigned char c = mf.data[mf.currentIndex + HEADER_SECTION_1];
+	c = c >> shift;
+	mf = getParams(mf, c);
+	int bitrate = mf.base + (mf.incrementor * mf.multiplier);
+	return bitrate;
+}
+
+/*sets parameters to calculate bitrate*/
+myfile getParams(myfile mf, unsigned char c)
+{
+	if( c <= 5)
+		mf = setMfMath(mf, 32, 8, ((int) c) - 1);
+	else if(c <= 9)
+		mf = setMfMath(mf, 64, 16, ((int) c) - 5);
+	else if(c <= 13)
+		mf = setMfMath(mf, 128, 32, ((int) c) - 9);
+	else
+		mf = setMfMath(mf, 256, 64, ((int) c) - 13);
+	return mf;
+}
+
+myfile setMfMath(myfile mf, int b, int i, int m)
+{
+	mf.base = b;
+	mf.incrementor = i;
+	mf.multiplier = m;
+	return mf;
+}
+
+int isBitOn(myfile mf, int shift, int headerSection)
+{
+	if(mf.currentIndex == -1)
+		return 0;
+
+	unsigned char c = mf.data[mf.currentIndex + headerSection];
+	return 1 & ( c >> shift );
 }
 
 myfile getSequenceIndex(myfile mf)
@@ -98,7 +190,7 @@ myfile getSequenceIndex(myfile mf)
 	int i; 
 	for(i = 0; i < mf.size - 1; i++)
 	{
-		if((mf.data[i] ^ sequence) == 0 && (mf.data[i + 1] & sequence_half) == sequence_half)
+		if((mf.data[i] ^ SEQUENCE) == 0 && (mf.data[i + 1] & SEQUENCE_HALF) == SEQUENCE_HALF)
 		{
 			mf.currentIndex = i + 1;
 			return mf;
