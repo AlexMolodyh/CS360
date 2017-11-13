@@ -91,6 +91,7 @@ int main( int argc, char ** argv )
 		exit(EXIT_SUCCESS);
 	}
 
+
 	mf = getSequenceIndex(mf);/*Index for start of SEQUENCE bits*/
 
 	/*Check to see if the file format is in mpeg layer 3*/
