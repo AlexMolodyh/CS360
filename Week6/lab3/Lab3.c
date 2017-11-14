@@ -94,23 +94,27 @@ int main( int argc, char ** argv )
 
 	mf = getSequenceIndex(mf);/*Index for start of SEQUENCE bits*/
 
+	printf("File size: %.2f MB\n", ((mf.size/MB_BYTES) * 100) * 0.01f );
+	
 	/*Check to see if the file format is in mpeg layer 3*/
-	if(isBitOn(mf, MPEG_SHIFT, HEADER_SECTION_0) && isBitOn(mf, LAYER_3_SHIFT, HEADER_SECTION_0))
+	printf("Is an mpeg layer 3: %s\n", (((6 & mf.data[mf.currentIndex]) == 2) ? "Yes" : "No"));
+	if((6 & mf.data[mf.currentIndex]) != 2)
 	{
-		printf("File size: %.2f MB\n", ((mf.size/MB_BYTES) * 100) * 0.01f );
-		printf("Is an mpeg layer 3: Yes\n");
-		printf("Bitrate: %dkbps at %.1fkHz\n", getBitrate(mf, BIT_RATE_SHIFT), (getFrequency(mf, FREQUENCY_SHIFT) / 1000) );
-		printf("Is copyright? %s\n", ((isBitOn(mf, COPYRIGHT_SHIFT, HEADER_SECTION_2)) ? "Yes" : "No"));
-		printf("Is original? %s\n", ((isBitOn(mf, ORIGINAL_COPY_SHIFT, HEADER_SECTION_2) == 0 ) ? "Yes" : "No"));
+		printf("exiting.....");
+		exit(EXIT_SUCCESS);
+	}
+	printf("Bitrate: %dkbps at %.1fkHz\n", getBitrate(mf, BIT_RATE_SHIFT), (getFrequency(mf, FREQUENCY_SHIFT) / 1000) );
+	printf("Is copyright? %s\n", ((isBitOn(mf, COPYRIGHT_SHIFT, HEADER_SECTION_2)) ? "Yes" : "No"));
+	printf("Is original? %s\n", ((isBitOn(mf, ORIGINAL_COPY_SHIFT, HEADER_SECTION_2) == 0 ) ? "Yes" : "No"));
 
-		if(isBitOn(mf, COPYRIGHT_SHIFT, HEADER_SECTION_2))
+	if(isBitOn(mf, COPYRIGHT_SHIFT, HEADER_SECTION_2))
+	{
+		if(isBitOn(mf, ORIGINAL_COPY_SHIFT, HEADER_SECTION_2))
 		{
-			if(isBitOn(mf, ORIGINAL_COPY_SHIFT, HEADER_SECTION_2))
-			{
-				printf("\nALERT!!! %s is not an ORIGINAL copy!!\n", mf.filename);
-			}
+			printf("\nALERT!!! %s is not an ORIGINAL copy!!\n", mf.filename);
 		}
 	}
+
 	else/*file is not mpeg layer 3. delete struct and exit program*/
 	{
 		deletemf(mf);
