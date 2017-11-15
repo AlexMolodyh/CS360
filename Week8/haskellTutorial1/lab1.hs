@@ -6,7 +6,7 @@
 --as prfix functions without explicitly sarrounding them with parenthesis like so 5 * (-3).
 
 --1.3
-sqrt 818281336460929553769504384519009121840452831049
+labOnep3 = sqrt 818281336460929553769504384519009121840452831049
 --answer: 9.045890428592033e23
 
 --1.4
