@@ -12,4 +12,9 @@ removeNonUppercase st = [ c | c <- st, c `elem` ['A'..'Z']]
 
 evenInList xxs = [ [ x | x <- xs, even x ] | xs <- xxs]
 
-evenThird xs = [x | x <-  ]
+strlength :: [Char] -> Int
+strlength st = length [s | s <- st]
+
+makeList f = [[x | x <- [1..s]] | s <- [1..f] ]
+
+sanitize st = concat [if c `elem` [' '] then ['%','2','0'] else (c:[]) | c <- st]
