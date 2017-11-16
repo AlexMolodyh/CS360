@@ -37,3 +37,10 @@ factorial n = n * factorial (n - 1)
 bList x = [ [ [ t | t <- [1..s]] | s <- [1..x]] | x <- [1..20]]
 
 multMatrix b c = [b * c | b <- [1..b], c <- [1..c]]
+
+
+--addVectors :: (Num a) => (a, a) -> (a, a) -> (a, a)
+--addVectors a b = (fst a + fst b, snd a + snd b)
+
+addVectors :: (Num a) => (a, a) -> (a, a) -> (a, a)
+addVectors (x1, y1) (x2, y2) = (x1 + x2, y1 + y2)
