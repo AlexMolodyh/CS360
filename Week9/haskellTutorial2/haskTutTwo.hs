@@ -15,5 +15,7 @@ fibonacci x
 
 --5.3 (lab 5 question 3)
 count :: (Eq a, Num b) => a -> [a] -> b
-count a [a]
-    | 
+count x [] = 0
+count x xs
+    | x == head xs = 1
+    | otherwise = count x (tail xs)
