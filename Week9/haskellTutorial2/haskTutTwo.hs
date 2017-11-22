@@ -14,3 +14,6 @@ fibonacci x
 
 
 --5.3 (lab 5 question 3)
+count :: (Eq a, Num b) => a -> [a] -> b
+count a [a]
+    | 
