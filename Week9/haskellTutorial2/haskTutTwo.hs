@@ -25,4 +25,9 @@ count' a (x:xs)
     | a == x = 1 + (count a xs)
     | a /= x = 0 + (count a xs)
 
---5.4
+--5.5 (lab 5 question 5)
+sanitize :: [Char] -> [Char]
+sanitize [] = []
+sanitize (x:xs)
+    | x `elem` [' '] = '%':'2':'0':[] ++ sanitize xs
+    | otherwise = x:[] ++ sanitize xs
