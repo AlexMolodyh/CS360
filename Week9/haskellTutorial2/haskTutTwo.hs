@@ -13,9 +13,16 @@ fibonacci x
     | otherwise = (fibonacci (x - 1)) + (fibonacci (x - 2))
 
 
---5.3 (lab 5 question 3)
+--5.3 (lab 5 question 3) using if
 count :: (Eq a, Num b) => a -> [a] -> b
-count x [] = 0
-count x xs
-    | x == head xs = 1
-    | otherwise = count x (tail xs)
+count a [] = 0
+count a (x:xs) = if a == x then 1 + (count a xs) else 0 + (count a xs)
+
+--5.3 (lab 5 question 3) using guards
+count' :: (Eq a, Num b) => a -> [a] -> b
+count' a [] = 0
+count' a (x:xs)
+    | a == x = 1 + (count a xs)
+    | a /= x = 0 + (count a xs)
+
+--5.4
