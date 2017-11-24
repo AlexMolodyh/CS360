@@ -83,3 +83,30 @@ quicksort' (x:xs) =
     let smallerSorted = quicksort' (filter (<=x) xs)  
         biggerSorted = quicksort' (filter (>x) xs)   
     in  smallerSorted ++ [x] ++ biggerSorted 
+
+
+chain :: (Integral a) => a -> [a]
+chain 1 = [1]
+chain n
+    | even n = n:chain (n `div` 2)
+    | odd n = n:chain (n*3 + 1)
+
+
+numLongChains :: Int -> Int -> Int
+numLongChains x y = length (filter (\xs -> length xs > y) (map chain [1..x]))
+
+
+sum' :: (Num a) => [a] -> a  
+sum' xs = foldl (\acc x -> acc + x) 0 xs
+
+sum'' :: (Num a) => [a] -> a  
+sum'' = foldl (+) 0
+
+
+elem'' :: (Eq a) => a -> [a] -> Bool  
+elem'' y ys = foldl (\acc x -> if x == y then True else acc) False ys
+
+
+reverse' :: [a] -> [a]
+reverse' [] = []
+reverse' xs = foldl (\acc x -> x:acc ) [] xs

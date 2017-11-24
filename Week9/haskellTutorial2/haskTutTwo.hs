@@ -100,3 +100,22 @@ rightTriang (z, w) = (\(x, y) -> (x, y, sqrt (x*x + y*y)) ) (z, w)
 
 
 ------------------------------lab 7------------------------------------
+
+--7.1 foldl
+--foldl (*) 6 [5, 3, 8]
+--step 1 accumulator 6 * 5 = 30 <- new accumulator
+--step 2 accumulator 30 * 3 = 90 <- new accumulator
+--step 3 accumulator 90 * 8 = 720 <- new accumulator
+
+--7.1 foldr
+--foldr (*) 6 [5, 3, 8]
+--step 1 accumulator 6 * 8 = 48 <- new accumulator
+--step 2 accumulator 48 * 3 = 144 <- new accumulator
+--step 3 accumulator 144 * 5 = 720 <- new accumulator
+
+--foldl starts from the head of a list and folds it up towards the tail
+--and its binary function is (\acc x -> acc * x)
+
+--foldr starts from the tail of a list and folds it up towards the head
+--and its binary function is (\x acc -> x * acc)
+
