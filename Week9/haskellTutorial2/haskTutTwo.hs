@@ -31,3 +31,28 @@ sanitize [] = []
 sanitize (x:xs)
     | x `elem` [' '] = '%':'2':'0':[] ++ sanitize xs
     | otherwise = x:[] ++ sanitize xs
+
+
+--6.1.a (lab 6 question 1 a)
+multByTen :: Num a => [a] -> [a]
+multByTen [] = []
+multByTen xs = zipWith (\x y -> x * y) xs (cycle [10])
+
+
+--6.1.b (lab 6 question 1 b)
+infinyPowTwo :: (Enum a, Num a) => [a]
+infinyPowTwo = map powOfTwo [1..]
+
+powOfTwo :: (Enum a, Num a) => a -> a
+powOfTwo = (^2)
+
+
+--6.1.c (lab 6 question 1 c)
+increElmnt :: (Enum a, Num a) => [a] -> [a]
+increElmnt [] = []
+increElmnt xs = map (\x -> succ x ) xs
+
+--part 2 of question 1 c
+increElmnt' :: [Char] -> [Char]
+increElmnt' [] = []
+increElmnt' xs = map (\x -> succ x ) xs
