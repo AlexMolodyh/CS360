@@ -95,7 +95,8 @@ calcRightTriang :: Floating a => [(a, a)] -> [(a, a, a)]
 calcRightTriang [] = [(0, 0, 0)]
 calcRightTriang xs = map (\x -> rightTriang x ) xs
 
-
-
 rightTriang :: Floating c => (c, c) -> (c, c, c)
 rightTriang (z, w) = (\(x, y) -> (x, y, sqrt (x*x + y*y)) ) (z, w)
+
+
+------------------------------lab 7------------------------------------
