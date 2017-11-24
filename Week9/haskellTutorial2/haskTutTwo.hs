@@ -88,3 +88,14 @@ secondElem :: Ord a => [a] -> a
 secondElem [] = error "Wont work on an empty list!!!"
 secondElem (x:[]) = x
 secondElem xs = (\x -> head (tail x)) xs
+
+
+--6.4 (lab 6 question 4)
+calcRightTriang :: Floating a => [(a, a)] -> [(a, a, a)]
+calcRightTriang [] = [(0, 0, 0)]
+calcRightTriang xs = map (\x -> rightTriang x ) xs
+
+
+
+rightTriang :: Floating c => (c, c) -> (c, c, c)
+rightTriang (z, w) = (\(x, y) -> (x, y, sqrt (x*x + y*y)) ) (z, w)
