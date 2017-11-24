@@ -32,6 +32,7 @@ sanitize (x:xs)
     | x `elem` [' '] = '%':'2':'0':[] ++ sanitize xs
     | otherwise = x:[] ++ sanitize xs
 
+-------------------------lab 6----------------------------
 
 --6.1.a (lab 6 question 1 a)
 multByTen :: Num a => [a] -> [a]
@@ -56,3 +57,34 @@ increElmnt xs = map (\x -> succ x ) xs
 increElmnt' :: [Char] -> [Char]
 increElmnt' [] = []
 increElmnt' xs = map (\x -> succ x ) xs
+
+
+--6.1.d (lab 6 question 1 d)
+subTen :: Num a => [a] -> [a]
+subTen [] = []
+subTen [x] = (flip (-) 10 x):[]
+subTen (x:xs) = subTen (x:[]) ++ subTen xs
+
+
+--6.1.e (lab 6 question 1 e)
+removeSpace :: [Char] -> [Char]
+removeSpace [] = []
+removeSpace xs = filter (/=' ') xs
+
+
+--6.2
+--6.2.a (lab 6 question 2 a)
+plus :: Num a => a -> a -> a
+plus b c = (\x y -> x + y) b c
+
+
+--6.2.b (lab 6 question 2 b)
+multFour :: Num a => a -> a
+multFour z = (\x -> x * 4) z
+
+
+--6.2.c (lab 6 question 2 c)
+secondElem :: Ord a => [a] -> a
+secondElem [] = error "Wont work on an empty list!!!"
+secondElem (x:[]) = x
+secondElem xs = (\x -> head (tail x)) xs
