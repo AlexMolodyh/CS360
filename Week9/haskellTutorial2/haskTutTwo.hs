@@ -1,3 +1,9 @@
+--Author: Alexander Molodyh
+--Date: 11/24/2017
+--Class: CS360
+--Assignment HaskellTutorial 2 Lab 5, 6, 7.1
+
+
 --5.1 (lab 5 question 1)
 gcdMine :: (Integral a) => a -> a -> a
 gcdMine a b
