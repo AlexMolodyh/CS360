@@ -124,4 +124,3 @@ rightTriang (z, w) = (\(x, y) -> (x, y, sqrt (x*x + y*y)) ) (z, w)
 
 --foldr starts from the tail of a list and folds it up towards the head
 --and its binary function is (\x acc -> x * acc)
-
