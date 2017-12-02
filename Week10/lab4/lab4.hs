@@ -32,17 +32,26 @@ process text = concat $ buildElements [] $ buildElemList (split text ".#+>$*(){}
 
 --Builds element string from element list
 buildElements :: [String] -> [String] -> [String]
+buildElements xs []                 = [""]
 buildElements [] ys
     | "class" `isInfixOf` (head ys) = ("<div" ++ head ys ++ "</div>"):[]
     | "id" `isInfixOf` (head ys)    = ("<div" ++ head ys ++ "</div>"):[]
     | length ys < 2                 = ys
-    | otherwise                     = buildElements ((head ys):[] ++ (head (tail ys)):[] ) (tail (tail ys))
+    | otherwise                     = buildElements ((head ys):[] ++ (head $ tail ys):[] ) (tail $ tail ys)
 buildElements xs ys
     | "class" `isInfixOf` (head ys) = buildElements (insertAttr xs (head ys)) (tail ys)
     | "id" `isInfixOf` (head ys)    = buildElements (insertAttr xs (head ys)) (tail ys)
-    | '>' == (head (head ys))       = buildElements (nestChild xs $ tail ys) (tail $ tail ys)
-    | '*' == (head (head ys))       = [xs | [1..(digitToInt (head (tail ys)))]]:[] --working here
+    | '>' == (head $ head ys)       = buildElements (nestChild xs $ tail ys) (tail $ tail ys)
+    | '*' == (head $ head ys)       = buildElements (concatNStr xs (digitToInt $ head $ head $ tail ys)) (tail $ tail ys) ++ [""]
     | otherwise                     = xs
+
+
+--Concatenate the given string list n amount of times
+concatNStr :: [String] -> Int -> [String]
+concatNStr [] n = [""]
+concatNStr xs n
+    | n < 1 = xs
+    | otherwise = xs ++ concatNStr xs (n - 1)
 
 
 --Nests a child element inside the parent element
@@ -54,8 +63,10 @@ nestChild xs ys = (init xs) ++ (head ys):[] ++ (head (tail ys)):[] ++ (last xs):
 --Builds a list of elements and attributes 
 buildElemList :: [String] -> [String]
 buildElemList []                    = [""]
+buildElemList [x]                   = [""]
 buildElemList (x:xs)
-    | (head x) `elem` ".#$(){}^+>"  = buildAttr (head x) (head xs) ++ buildElemList (tail xs)
+    | (head x) `elem` ".#(){}^+>"   = buildAttr (head x) (head xs) ++ buildElemList (tail xs)
+    | (head x) `elem` "*$"          = (x:[] ++ (head xs):[]) ++ buildElemList (tail xs)
     | otherwise                     = buildElem x ++ buildElemList xs
 
 
