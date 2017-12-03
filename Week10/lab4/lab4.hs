@@ -2,12 +2,16 @@
     CS 360 lab 4
     Emmet syntax HTML generator.
     Starting code
-    YOUR NAME HERE
+    Alexander Molodyh
+
+    Note: I've implemented the extra credit as well. if you type li*3 it will produce 3 li's if you 
+        type p.row#myrow*5 it will produce <p class="row" id="myrow"></p> five times, not the way
+        emmet works but ow well....
 -}
 
 module Main
 (
-main
+    main
 ) where
 
 import System.IO (hFlush, stdout)
@@ -21,25 +25,24 @@ import Data.Char
     This one obviously doesn't do what is required for the lab,
     but is just here to show you the basic I/O
 -}
--- process :: String -> String
--- process text = if head text == 'p'
---     then "<p></p>"
---     else "Only works for 'p'"
 
 process :: String -> String
 process text = concat $ buildElements [] $ buildElemList (split text ".#+>$*(){}")
 
 
---Builds element string from element list
+-----------------------my functions start----------------------------------------
+
+--Recursive function
+--Builds element(s) string(s) from split list
 buildElements :: [String] -> [String] -> [String]
-buildElements [[]] ys
-    | "class" `isInfixOf` (head ys) = ("<div" ++ head ys ++ "</div>"):[]
-    | "id" `isInfixOf` (head ys)    = ("<div" ++ head ys ++ "</div>"):[]
-    | otherwise                     = buildElements ((head ys):[] ++ (head $ tail ys):[]) (tail $ tail ys)
+buildElements [] ys                 = buildElements ([head ys] ++ [head $ tail ys] ) (tail $ tail ys)
 buildElements xs ys
     | "class" `isInfixOf` (head ys) = buildElements (insertAttr xs (head ys)) (tail ys)
     | "id" `isInfixOf` (head ys)    = buildElements (insertAttr xs (head ys)) (tail ys)
+    | '>' == th                     = buildElements (nestChild xs $ tail ys) (tail $ tail ys)
+    | '*' == th                     = buildElements (concatNStr xs ((digitToInt $ head $ head $ tail ys) - 1)) (tail $ tail ys)
     | otherwise                     = xs
+        where th = if (length ys <= 1) then ' ' else (head $ head ys)
 
 
 --Concatenate the given string list n amount of times
@@ -52,7 +55,7 @@ concatNStr xs n
 
 --Nests a child element inside the parent element
 nestChild :: [String] -> [String] -> [String]
-nestChild xs ys = (init xs) ++ (head ys):[] ++ (head (tail ys)):[] ++ (last xs):[]
+nestChild xs ys = (init xs) ++ [head ys] ++ [head $ tail ys] ++ [last xs]
 
 
 
@@ -61,22 +64,22 @@ buildElemList :: [String] -> [String]
 buildElemList []                    = [""]
 buildElemList (x:xs)
     | (head x) `elem` ".#(){}^+>"   = buildAttr (head x) (head xs) ++ buildElemList (tail xs)
-    | (head x) `elem` "*$"          = (x:[] ++ (head xs):[]) ++ buildElemList (tail xs)
+    | (head x) `elem` "*$"          = ([x] ++ [head xs]) ++ buildElemList (tail xs)
     | otherwise                     = buildElem x ++ buildElemList xs
 
 
-    --Builds a single attribute
+--Builds a single attribute
 buildAttr :: Char -> String -> [String]
 buildAttr _ []      = [""]
 buildAttr attr val
-    | attr == '.'   = (createClass val):[]
-    | attr == '#'   = (createId val):[]
+    | attr == '.'   = [createClass val]
+    | attr == '#'   = [createId val]
     | otherwise     = buildSubElems attr val
 
     
 --Builds a list of elements that go inside another element or are concatenated or are multiplied
 buildSubElems :: Char -> String -> [String]
-buildSubElems x val = (x:[]):[] ++ printTag val
+buildSubElems x val = [[x]] ++ printTag val
 
 
 --Builds a single elemement
@@ -90,10 +93,10 @@ printTag :: String -> [String]
 printTag x = startTag x ++ endTag x
 
 startTag :: String -> [String]
-startTag x = ("<" ++ x ++ ">"):[]
+startTag x = ["<" ++ x ++ ">"]
 
 endTag :: String -> [String]
-endTag x = ("</" ++ x ++ ">"):[]
+endTag x = ["</" ++ x ++ ">"]
 
 
 --Creats a class with the text value inside
@@ -109,11 +112,13 @@ insertAttr :: [String] -> String -> [String]
 insertAttr e val = insertVal (head e) val ++ tail e
 
 insertVal :: String -> String -> [String]
-insertVal e val = ((init e) ++ val ++ ">"):[]
+insertVal e val = [(init e) ++ val ++ ">"]
+
+---------------------my functions end------------------------
 
 
 
-
+-- functions from class example
 -- fold function
 sfn :: ([String],String,[Char]) -> Char -> ([String],String,[Char])
 sfn (ans,ws,c) x
@@ -131,16 +136,6 @@ split xs c  = extract $ foldl sfn ([],"",c) xs
                                        -- example because the accumulator was the answer we needed.  Here
                                        -- the answer is in the tuple but still has the last operation needed
                                        -- to shuttle over the last value
-{-
-*Main> split'' "div#hello.there>there*3" "#.>*"
-["div","#","hello",".","there",">","there","*","3"]                                   
--}
-
-
-
-
-
-
 
 {-
     The main entry point function.  Interactively expand Emmet syntax
