@@ -32,17 +32,13 @@ process text = concat $ buildElements [] $ buildElemList (split text ".#+>$*(){}
 
 --Builds element string from element list
 buildElements :: [String] -> [String] -> [String]
-buildElements xs []                 = [""]
-buildElements [] ys
+buildElements [[]] ys
     | "class" `isInfixOf` (head ys) = ("<div" ++ head ys ++ "</div>"):[]
     | "id" `isInfixOf` (head ys)    = ("<div" ++ head ys ++ "</div>"):[]
-    | length ys < 2                 = ys
-    | otherwise                     = buildElements ((head ys):[] ++ (head $ tail ys):[] ) (tail $ tail ys)
+    | otherwise                     = buildElements ((head ys):[] ++ (head $ tail ys):[]) (tail $ tail ys)
 buildElements xs ys
     | "class" `isInfixOf` (head ys) = buildElements (insertAttr xs (head ys)) (tail ys)
     | "id" `isInfixOf` (head ys)    = buildElements (insertAttr xs (head ys)) (tail ys)
-    | '>' == (head $ head ys)       = buildElements (nestChild xs $ tail ys) (tail $ tail ys)
-    | '*' == (head $ head ys)       = buildElements (concatNStr xs (digitToInt $ head $ head $ tail ys)) (tail $ tail ys) ++ [""]
     | otherwise                     = xs
 
 
@@ -63,7 +59,6 @@ nestChild xs ys = (init xs) ++ (head ys):[] ++ (head (tail ys)):[] ++ (last xs):
 --Builds a list of elements and attributes 
 buildElemList :: [String] -> [String]
 buildElemList []                    = [""]
-buildElemList [x]                   = [""]
 buildElemList (x:xs)
     | (head x) `elem` ".#(){}^+>"   = buildAttr (head x) (head xs) ++ buildElemList (tail xs)
     | (head x) `elem` "*$"          = (x:[] ++ (head xs):[]) ++ buildElemList (tail xs)
